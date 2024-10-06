@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/context/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { IMessage } from "@/index";
-import api from "@/lib/api";
 import { useSocket } from "@/context/SocketProvider";
 import { useMemo, useState } from "react";
 
@@ -45,7 +44,7 @@ export default function UserList({ messages }: { messages: IMessage[] }) {
           <Plus className="h-5 w-5 text-slate-600" />
         </Button>
       </div>
-      <ScrollArea className="h-screen ">
+      <ScrollArea className="h-[calc(100vh-5rem)] ">
         <div className="p-4">
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -72,14 +71,15 @@ const UserItem = ({ user, messages }: { user: IUser; messages: IMessage[] }) => 
 
   const handleClick = async (user: IUser) => {
     setCurrUser(user);
-    if (messagesToMarkAsRead.length > 0) {
+    if (messagesIdsToMarkAsRead.length > 0) {
       socket.emit("messages:mark-as-read", {
-        messageIds: messagesToMarkAsRead,
+        messageIds: messagesIdsToMarkAsRead,
       });
     }
   };
-  const messagesToMarkAsRead = useMemo(() => {
-    return messages.filter(message => message.sender._id === user._id && !message.isRead);
+  
+  const messagesIdsToMarkAsRead :string[] = useMemo(() => {
+    return messages.filter(message => message.sender._id === user._id && !message.isRead).map(mes=>mes._id);
   }, [messages]);
   const unreadMessagesCount = useMemo(
     () => messages.filter(message => message.sender._id === user._id && !message.isRead).length,

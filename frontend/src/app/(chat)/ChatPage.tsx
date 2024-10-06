@@ -30,21 +30,24 @@ export default function ChatPage() {
   useEffect(() => {
     socket.on("message", (eventMessage: IMessage) => {
       setMessages(prevMessages => [...prevMessages, eventMessage]);
-      displayNotification(eventMessage);
+      // displayNotification(eventMessage);
     });
+  
     socket.on("messages:marked-read", ({ messageIds }: { messageIds: string[] }) => {
+      console.log("messages received to mark as read", messageIds);
       if (messageIds && messageIds.length > 0) {
-        setMessages(prevMessages =>
-          prevMessages.map(prevMessage =>
+        setMessages(prevMessages => 
+          prevMessages.map(prevMessage => 
             messageIds.includes(prevMessage._id) ? { ...prevMessage, isRead: true } : prevMessage
           )
         );
       }
     });
+  
 
     return () => {
       socket.off("message");
-      socket.off("mark-as-read");
+      socket.off("messages:marked-read");
     };
   }, [socket]);
 

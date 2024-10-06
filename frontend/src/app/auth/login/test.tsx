@@ -12,20 +12,13 @@ import api from "@/lib/api";
 import { useAuth } from "@/lib/context/AuthProvider";
 import { Copy } from "lucide-react"
 
-interface IFormData{
-  name: string,
-  email: string,
-  password: string,
-}
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState<boolean>(false)
-  const [isSignup, setIsSignup] = useState<boolean>(false)
-  const [formData, setFormData] = useState<IFormData>({
-    name: "",
+  const [showPassword, setShowPassword] = useState(false)
+  const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [pending, setPending] = useState<boolean>(false);
+  const [pending, setPending] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
 
@@ -41,20 +34,11 @@ export default function LoginPage() {
     event.preventDefault();
     try {
       setPending(true);
-
-      if(isSignup){
-        const res = await api.post("/auth/register", formData);
-        const token = res.data.token;
-        localStorage.setItem("token", token);
-        login();
-        router.push("/");
-      }else{
-        const res = await api.post("/auth/login", formData);
-        const token = res.data.token;
-        localStorage.setItem("token", token);
-        login();
-        router.push("/");
-      }
+      const res = await api.post("/auth/login", formData);
+      const token = res.data.token;
+      localStorage.setItem("token", token);
+      login();
+      router.push("/");
     } catch (error) {
       console.log(error);
       toast.error(error);
@@ -93,15 +77,9 @@ export default function LoginPage() {
           </div>
           
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {isSignup && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" name='name' type="text" value={formData.name} onChange={handleChange} required />
-              </div>
-            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name='email' type="email" value={formData.email} onChange={handleChange} required />
+              <Input id="email" type="email" value={formData.email} onChange={handleChange} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -110,7 +88,6 @@ export default function LoginPage() {
                   id="password" 
                   type={showPassword ? "text" : "password"} 
                   required 
-                  name='password'
                   value={formData.password}
                   onChange={handleChange}
                 />
@@ -135,8 +112,6 @@ export default function LoginPage() {
               <a href="#" className="text-sm text-blue-600 hover:underline">Forgot password?</a>
             </div>
             <Button pending={pending} type="submit" className="w-full">Log in</Button>
-
-            {/* Google login button */}
             <Button variant="outline" className="w-full">
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
@@ -161,13 +136,7 @@ export default function LoginPage() {
           </form>
           
           <p className="text-center text-sm text-gray-600">
-            {
-              isSignup ? "Already have an account?" : "Don't have an account?"
-            } <Button onClick={()=>setIsSignup(!isSignup)} variant="link" className="text-blue-600 hover:underline">
-              {
-                isSignup ? "Log in" : "Sign up"
-              }
-            </Button>
+            Don't have an account? <a href="#" className="text-blue-600 hover:underline">Sign up</a>
           </p>
         </div>
       </div>

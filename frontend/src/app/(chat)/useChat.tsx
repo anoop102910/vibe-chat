@@ -3,7 +3,7 @@ import { IUser, IMessage } from "@/index";
 
 interface ChatState {
   currUser: IUser | null;
-  setCurrUser: (user: IUser) => void;
+  setCurrUser: (user: IUser | null) => void;
 }
 
 export const useChat = create<ChatState>((set) => ({

@@ -52,30 +52,38 @@ function initializeSocket(server) {
 
       try {
         await newMessage.save();
+        console.log("message saved");
       } catch (error) {
         console.log(error);
       }
       const messageToSend = await Message.findById(newMessage._id)
         .populate("sender", "_id name email")
         .populate("receiver", "_id name email");
-      console.log("message saved");
+      console.log("message fetch from db to send");
 
       if (socketUsers.get(receiverId)) {
-        console.log(messageToSend);
-        console.log("message sent to ", messageToSend.receiver.name, socketUsers.get(receiverId));
+        console.log(
+          "message sent to ",
+          messageToSend.receiver.name,
+          "by",
+          messageToSend.sender.name
+        );
         io.to(socketUsers.get(receiverId)).emit("message", messageToSend);
+        console.log("message event emitted");
       }
     });
 
     socket.on("messages:mark-as-read", async ({ messageIds }) => {
-      console.log(messageIds);
+      console.log("messages received to mark as read", messageIds.length);
       try {
         await Message.updateMany({ _id: { $in: messageIds } }, { isRead: true });
+        console.log("messages marked as read");
       } catch (error) {
         console.log(error);
       }
-      console.log("messages marked as read");
+      console.log({ messageIds });
       io.to(socketUsers.get(socket.user._id)).emit("messages:marked-read", { messageIds });
+      console.log("messages marked as read event sent");
     });
 
     socket.on("disconnect", () => {
