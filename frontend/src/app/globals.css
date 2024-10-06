@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+  :root {
+    --radius: 0.5rem
+  }
+}
+::-webkit-scrollbar {
+  width: 4px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(200, 200, 200, 0.8);
+  border-radius: 10px;
+}
+
+.scrollable {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(200, 200, 200, 0.8) rgba(255, 255, 255, 0.5);
+}
+
+.container {
+  position: relative;
+  width: 300px;
+  height: 400px;
+  overflow: auto;
+}
+
+.content {
+  height: 800px;
+  background: linear-gradient(to bottom, #f0f0f0, #ffffff);
+}
+
+.input-slide {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.input-slide.email-slide {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.input-slide.password-slide {
+  opacity: 1;
+  transform: translateY(0);
+}
