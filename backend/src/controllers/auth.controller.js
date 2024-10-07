@@ -2,6 +2,7 @@ import jsonwebtoken from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/config.js";
 import User from "../models/user.model.js";
+import Login from "../models/login.model.js";
 
 export const signinToken = async user => {
   return jsonwebtoken.sign(
@@ -43,6 +44,8 @@ export const signin = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
+    const login = new Login({ userId: user._id, timestamp: new Date() });
+    await login.save();
     const token = await signinToken(user);
     res.status(200).json({ token });
   } catch (error) {

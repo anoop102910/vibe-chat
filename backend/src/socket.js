@@ -1,6 +1,9 @@
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import Message from "./models/message.model.js";
+import Redis from "ioredis";
+
+
 
 function initializeSocket(server) {
   const io = new Server(server, {
@@ -16,6 +19,26 @@ function initializeSocket(server) {
   const socketUsers = new Map();
   let connectedUsers = [];
 
+  const pub = new Redis({
+    host: "localhost",
+    port: 6379,
+  });
+  const sub = new Redis({
+    host: "localhost",
+    port: 6379,
+  });
+  
+  sub.subscribe("MESSAGE_CHANNEL", (err, count) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(`Subscribed to ${count} channels`);
+    }
+  });
+  
+ 
+
+
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (token) {
@@ -24,7 +47,7 @@ function initializeSocket(server) {
           next(new Error("Authentication failed"));
         } else {
           if (connectedUsers.includes(user._id)) {
-            return;
+            return next(new Error("User already connected"));
           } else {
             connectedUsers.push(user._id);
             socket.user = user;
@@ -36,12 +59,29 @@ function initializeSocket(server) {
       next(new Error("Authentication failed"));
     }
   });
+
   io.on("connection", socket => {
     console.log("A user connected ", socket.user.name);
     socketUsers.set(socket.user._id, socket.id);
+    
+    sub.on("message", (channel, message) => {
+      if (channel === "MESSAGE_CHANNEL") {
+        const messageData = JSON.parse(message);
+        console.log("message received from redis", channel, messageData);
+    
+        io.to(socketUsers.get(socket.user._id)).emit("message", messageData);
+        const receiverId = messageData.receiver._id;
+        if (socketUsers.get(receiverId)) {
+          console.log("message sent to ", messageData.receiver.name, "by", messageData.sender.name);
+          io.to(socketUsers.get(receiverId)).emit("message", messageData);
+          console.log("message event emitted");
+        }
+      }
+    });
 
     socket.on("message", async ({ receiverId, message }) => {
       console.log("message arrived");
+
       const newMessage = new Message({
         content: message.content,
         sender: socket.user._id,
@@ -55,22 +95,16 @@ function initializeSocket(server) {
         console.log("message saved");
       } catch (error) {
         console.log(error);
+        return;
       }
+
       const messageToSend = await Message.findById(newMessage._id)
         .populate("sender", "_id name email")
         .populate("receiver", "_id name email");
-      console.log("message fetch from db to send");
+      console.log("message fetched from db to send");
 
-      if (socketUsers.get(receiverId)) {
-        console.log(
-          "message sent to ",
-          messageToSend.receiver.name,
-          "by",
-          messageToSend.sender.name
-        );
-        io.to(socketUsers.get(receiverId)).emit("message", messageToSend);
-        console.log("message event emitted");
-      }
+      pub.publish("MESSAGE_CHANNEL", JSON.stringify(messageToSend));
+      console.log("message published to redis");
     });
 
     socket.on("messages:mark-as-read", async ({ messageIds }) => {
@@ -81,12 +115,11 @@ function initializeSocket(server) {
       } catch (error) {
         console.log(error);
       }
-      console.log({ messageIds });
       io.to(socketUsers.get(socket.user._id)).emit("messages:marked-read", { messageIds });
       console.log("messages marked as read event sent");
     });
 
-    socket.on("typing", ({receiver, isTyping }) => {
+    socket.on("typing", ({ receiver, isTyping }) => {
       console.log("typing event received", receiver, isTyping);
       if (socketUsers.get(receiver)) {
         io.to(socketUsers.get(receiver)).emit("typing", { sender: socket.user._id, isTyping });

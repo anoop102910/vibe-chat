@@ -9,7 +9,7 @@ import { useChat } from "./useChat";
 const ContactInfo = () => {
   const {currUser, isProfileOpen, setIsProfileOpen} = useChat();
   return (
-    <div className="w-72 rounded-3xl p-4 bg-green-100 h-[calc(100vh-8px)] overflow-auto">
+    <div className="w-72 rounded-3xl p-4 bg-green-100 h-[calc(100vh-8px)] overflow-auto animate-width">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-medium">Chat Info</h2>
         <button onClick={() => setIsProfileOpen(false)} className="text-gray-500 hover:text-gray-700">

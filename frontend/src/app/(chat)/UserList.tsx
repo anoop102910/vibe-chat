@@ -27,10 +27,11 @@ export default function UserList({ messages }: { messages: IMessage[] }) {
   const { socket } = useSocket();
 
   useEffect(() => {
-    socket.on("typing", ({ sender, isTyping }) => {
-      setIsTyping(isTyping);
-      setTypingReceiver(sender);
-    });
+    if (socket)
+      socket!.on("typing", ({ sender, isTyping }) => {
+        setIsTyping(isTyping);
+        setTypingReceiver(sender);
+      });
   }, [socket]);
 
   if (isLoading) return <div>Loading...</div>;

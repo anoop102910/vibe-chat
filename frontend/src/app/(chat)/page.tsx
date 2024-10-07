@@ -3,6 +3,7 @@ import { useAuth } from "@/lib/context/AuthProvider";
 import ChatPageComponent from "./ChatPage";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import SocketProvider from "@/context/SocketProvider";
 export default function ChatPage() {
   const { isAuthenticated } = useAuth();
 
@@ -19,9 +20,9 @@ export default function ChatPage() {
       });
     }
   };
-  useEffect(() => {
-    requestNotification();
-  }, []);
+  // useEffect(() => {
+  //   requestNotification();
+  // }, []);
 
   useEffect(() => {
     if (isAuthenticated === false) {
@@ -34,8 +35,10 @@ export default function ChatPage() {
   }
 
   return (
+    <SocketProvider>
       <div className="p-2 bg-gray-900 h-scren w-full overflow-hidden">
         <ChatPageComponent />
       </div>
+    </SocketProvider>
   );
 }

@@ -1,14 +1,6 @@
 "use client";
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { IMessage } from "@/index";
-
-const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
-  withCredentials: true,
-  auth: {
-    token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
-  },
-});
 
 interface MessageEvent {
   content: string;
@@ -18,13 +10,23 @@ interface MessageEvent {
 
 interface SocketContextType {
   sendMessage: (receiverId: string, message: MessageEvent) => void;
-  socket: Socket;
+  socket: Socket | null;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
 const SocketProvider = ({ children }: { children: React.ReactNode }) => {
+
+  const [socket, setSocket] = useState<Socket | null>(null);
   useEffect(() => {
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
+      withCredentials: true,
+      auth: {
+        token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
+      },
+    });
+    setSocket(socket);
+
     console.log("inside SocketProvider useEffect");
     socket.on("connect", () => {
       console.log("Connected to the socket server");
@@ -45,7 +47,7 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   
   const sendMessage = (receiverId: string, message: MessageEvent) => {
-    socket.emit("message", { receiverId, message });
+    socket?.emit("message", { receiverId, message });
   };
 
   return (

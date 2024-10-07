@@ -52,3 +52,15 @@
   opacity: 1;
   transform: translateY(0);
 }
+
+.animate-width{
+  animation: width 1s ease; 
+}
+@keyframes width {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
