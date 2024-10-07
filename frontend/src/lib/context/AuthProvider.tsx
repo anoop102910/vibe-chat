@@ -19,7 +19,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(undefined);
   const [user, setUser] = useState<User>({ _id: "", name: "", avatar: "", role: "" });
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
   useEffect(() => {
     login();
   }, []);

@@ -86,6 +86,13 @@ function initializeSocket(server) {
       console.log("messages marked as read event sent");
     });
 
+    socket.on("typing", ({receiver, isTyping }) => {
+      console.log("typing event received", receiver, isTyping);
+      if (socketUsers.get(receiver)) {
+        io.to(socketUsers.get(receiver)).emit("typing", { sender: socket.user._id, isTyping });
+      }
+    });
+
     socket.on("disconnect", () => {
       connectedUsers = connectedUsers.filter(id => id !== socket.user._id);
       socketUsers.delete(socket.user._id);

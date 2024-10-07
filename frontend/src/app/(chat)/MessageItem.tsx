@@ -2,7 +2,7 @@ import { useAuth } from "@/lib/context/AuthProvider";
 import { IMessage } from "@/index";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { RANDOM_IMAGE_URL } from "@/constant";
+import { AVATAR_URL, RANDOM_IMAGE_URL } from "@/constant";
 import { useSocket } from "@/context/SocketProvider";
 const MessageItem = ({ message }: { message: IMessage }) => {
     const { user } = useAuth();
@@ -14,7 +14,7 @@ const MessageItem = ({ message }: { message: IMessage }) => {
         }`}
       >
         <Avatar className=" rounded-lg">
-          <AvatarImage src={`https://api.dicebear.com/9.x/dylan/svg?seed=${message.sender._id}`} />
+          <AvatarImage src={AVATAR_URL + message.sender._id} />
           <AvatarFallback>
             {message.sender.name
               .split(" ")
@@ -62,12 +62,12 @@ const MessageItem = ({ message }: { message: IMessage }) => {
             ) : (
               <div></div>
             )}
-            {/* <div>
-              <span className="text-xs text-gray-500">{message.sentAt}</span>
-              {!message.isSent && <span className="text-xs text-gray-500">Sending</span>}
-              {message.isDelivered && <span className="text-xs text-gray-500">Delivered</span>}
-              {message.isRead && <span className="text-xs text-gray-500">Read</span>}
-            </div> */}
+            <div>
+              <span className="text-xs text-gray-500">{new Date(message.sentAt).toLocaleTimeString()}</span>
+              {/* {!message.isSent && <span className="text-xs text-gray-500">Sending</span>} */}
+              {/* {message.isDelivered && <span className="text-xs text-gray-500">Delivered</span>} */}
+              {/* {message.isRead && <span className="text-xs text-gray-500">Read</span>} */}
+            </div>
           </div>
         </div>
       </div>

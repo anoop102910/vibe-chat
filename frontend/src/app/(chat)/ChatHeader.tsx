@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Search, Phone, MoreVertical } from "lucide-react";
 
 export default function ChatHeader() {
-    const { currUser } = useChat();
+    const { currUser, isProfileOpen, setIsProfileOpen } = useChat();
     return (
-      <div className="flex items-center justify-between p-4 border-b">
+      <div onClick={() => setIsProfileOpen(true)} className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center space-x-4">
           <h2 className="text-2xl font-medium">{currUser?.name}</h2>
           {/* <span className="text-sm text-gray-500">23 members, 10 online</span> */}

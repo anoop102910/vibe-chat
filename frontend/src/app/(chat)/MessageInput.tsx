@@ -10,7 +10,7 @@ import { useChat } from "./useChat";
 const MessageInput: React.FC<{
   setMessages: React.Dispatch<React.SetStateAction<IMessage[]>>;
 }> = ({ setMessages }) => {
-  const { sendMessage } = useSocket();
+  const { sendMessage,socket } = useSocket();
   const [message, setMessage] = useState("");
   const { currUser } = useChat();
   const { user } = useAuth();
@@ -40,6 +40,15 @@ const MessageInput: React.FC<{
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    setMessage(e.target.value);
+    socket.emit("typing", {
+      receiver: currUser?._id,
+      isTyping: true,
+    });
+  }
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="border-t p-4 bg-slate-100 rounded-2xl mx-2 group">
@@ -51,7 +60,7 @@ const MessageInput: React.FC<{
             placeholder="Your message"
             className="flex-1 outline-none focus:outline-none bg-slate-100 border-none p-2 "
             value={message}
-            onChange={e => setMessage(e.target.value)}
+            onChange={handleChange}
           />
           <Button variant="ghost" size="icon">
             <Mic className="h-5 w-5" />

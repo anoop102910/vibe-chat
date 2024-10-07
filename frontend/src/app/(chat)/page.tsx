@@ -1,7 +1,6 @@
 "use client";
 import { useAuth } from "@/lib/context/AuthProvider";
 import ChatPageComponent from "./ChatPage";
-import SocketProvider from "@/context/SocketProvider";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 export default function ChatPage() {
@@ -35,10 +34,8 @@ export default function ChatPage() {
   }
 
   return (
-    <SocketProvider>
       <div className="p-2 bg-gray-900 h-scren w-full overflow-hidden">
         <ChatPageComponent />
       </div>
-    </SocketProvider>
   );
 }

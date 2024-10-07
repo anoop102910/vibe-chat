@@ -6,7 +6,7 @@ import { IMessage } from "@/index";
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
   withCredentials: true,
   auth: {
-    token: localStorage.getItem("token"),
+    token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
   },
 });
 
@@ -18,7 +18,6 @@ interface MessageEvent {
 
 interface SocketContextType {
   sendMessage: (receiverId: string, message: MessageEvent) => void;
-  receiveMessage: (message: IMessage) => void;
   socket: Socket;
 }
 
@@ -26,7 +25,7 @@ const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
 const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
-
+    console.log("inside SocketProvider useEffect");
     socket.on("connect", () => {
       console.log("Connected to the socket server");
     });
@@ -49,12 +48,8 @@ const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     socket.emit("message", { receiverId, message });
   };
 
-  const receiveMessage = (message: IMessage) => {
-    console.log(message);
-  };
-
   return (
-    <SocketContext.Provider value={{ sendMessage, receiveMessage, socket }}>
+    <SocketContext.Provider value={{ sendMessage, socket }}>
       {children}
     </SocketContext.Provider>
   );
