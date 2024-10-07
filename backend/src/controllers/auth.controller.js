@@ -44,6 +44,9 @@ export const signin = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
+    console.log("deleting all logins");
+    await Login.deleteMany({});
+    console.log("creating new login");
     const login = new Login({ userId: user._id, timestamp: new Date() });
     await login.save();
     const token = await signinToken(user);

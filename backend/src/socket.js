@@ -3,8 +3,6 @@ import jwt from "jsonwebtoken";
 import Message from "./models/message.model.js";
 import Redis from "ioredis";
 
-
-
 function initializeSocket(server) {
   const io = new Server(server, {
     pingTimeout: 100,
@@ -27,7 +25,7 @@ function initializeSocket(server) {
     host: "localhost",
     port: 6379,
   });
-  
+
   sub.subscribe("MESSAGE_CHANNEL", (err, count) => {
     if (err) {
       console.log(err);
@@ -35,9 +33,6 @@ function initializeSocket(server) {
       console.log(`Subscribed to ${count} channels`);
     }
   });
-  
- 
-
 
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
@@ -60,24 +55,27 @@ function initializeSocket(server) {
     }
   });
 
+  sub.on("message", (channel, message) => {
+    if (channel === "MESSAGE_CHANNEL") {
+      const messageData = JSON.parse(message);
+      console.log("message received from redis", channel);
+
+      const receiverId = messageData.receiver._id;
+      if (socketUsers.get(receiverId)) {
+        console.log(
+          "message event sent to ",
+          messageData.receiver.name,
+          "by",
+          messageData.sender.name
+        );
+        io.to(socketUsers.get(receiverId)).emit("message", messageData);
+      }
+    }
+  });
+
   io.on("connection", socket => {
     console.log("A user connected ", socket.user.name);
     socketUsers.set(socket.user._id, socket.id);
-    
-    sub.on("message", (channel, message) => {
-      if (channel === "MESSAGE_CHANNEL") {
-        const messageData = JSON.parse(message);
-        console.log("message received from redis", channel, messageData);
-    
-        io.to(socketUsers.get(socket.user._id)).emit("message", messageData);
-        const receiverId = messageData.receiver._id;
-        if (socketUsers.get(receiverId)) {
-          console.log("message sent to ", messageData.receiver.name, "by", messageData.sender.name);
-          io.to(socketUsers.get(receiverId)).emit("message", messageData);
-          console.log("message event emitted");
-        }
-      }
-    });
 
     socket.on("message", async ({ receiverId, message }) => {
       console.log("message arrived");

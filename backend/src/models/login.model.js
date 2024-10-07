@@ -4,14 +4,17 @@ const loginSchema = new mongoose.Schema({
   userId: {
     type: String,
     required: true,
-    unique: true,
   },
   timestamp: {
     type: Date,
-    required: true,
+    default: Date.now,
+  },
+  logoutTime: {
+    type: Date,
   },
 });
 
 const Login = mongoose.model("Login", loginSchema);
+
 
 export default Login;
