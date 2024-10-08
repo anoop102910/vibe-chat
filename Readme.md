@@ -11,12 +11,14 @@ This real-time chat application allows users to communicate seamlessly with each
 - Real-time messaging
 - Online/offline status tracking
 - User discovery and chat addition
-- Data storage in Redis
+- Data storage in MongoDB
+- Scalable using Redis and Kafka
 
 ## Tech Stack
 - Node.js
-- SWR
+- Next.js
 - Socket.io
+- MongoDB
 - Redis
 - Kafka
 
