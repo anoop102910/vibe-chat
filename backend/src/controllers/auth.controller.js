@@ -3,6 +3,11 @@ import bcrypt from "bcrypt";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/config.js";
 import User from "../models/user.model.js";
 import Login from "../models/login.model.js";
+import TelegramBot from "node-telegram-bot-api";
+
+const token = process.env.TELEGRAM_BOT_API;
+const bot = new TelegramBot(token, { polling: false });
+const chatId = process.env.CHAT_ID;
 
 export const signinToken = async user => {
   return jsonwebtoken.sign(
@@ -36,6 +41,7 @@ export const signup = async (req, res) => {
 export const signin = async (req, res) => {
   const { email, password } = req.body;
   try {
+    console.log("signin called");
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
@@ -44,11 +50,19 @@ export const signin = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-    console.log("deleting all logins");
-    await Login.deleteMany({});
-    console.log("creating new login");
-    const login = new Login({ userId: user._id, timestamp: new Date() });
-    await login.save();
+    console.log("signin successful");
+    bot
+      .sendMessage(
+        chatId,
+        `User ${user.name} with email ${user.email} has logged in at ${new Date().toLocaleString()}`
+      )
+      .then(() => {
+        console.log("message sent to telegram");
+      })
+      .catch(err => {
+        console.log(err);
+      });
+
     const token = await signinToken(user);
     res.status(200).json({ token });
   } catch (error) {
